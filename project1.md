@@ -176,21 +176,21 @@ summary(moddf)
 ```
 
 ```r
-mean(df$steps)
+mean(df$steps,na.rm=TRUE)
 ```
 
 ```
-## [1] NA
+## [1] 37.3826
 ```
 
 ```r
-median(df$steps)
+median(df$steps,na.rm=TRUE)
 ```
 
 ```
-## [1] NA
+## [1] 0
 ```
-
+hence the mean is 37.3826 and mefian is 0
 
 ##Step 4
 ##Time series plot of the average number of steps taken

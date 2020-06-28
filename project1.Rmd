@@ -69,11 +69,11 @@ df<- tbl_df(csvfile)
 #To find the mean and median for each day and prepare a seperate table
 moddf<-df%>%group_by(date)%>%summarise(median(steps),mean(steps))
 summary(moddf)
-mean(df$steps)
-median(df$steps)
+mean(df$steps,na.rm=TRUE)
+median(df$steps,na.rm=TRUE)
 
 ```
-
+hence the mean is 37.3826 and mefian is 0
 
 ##Step 4
 ##Time series plot of the average number of steps taken
