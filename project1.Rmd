@@ -170,11 +170,11 @@ df$datetype <- sapply(df$date, function(x) {
 #now we plot panel graphs giving info about steps taken per interval based on weekday/weekend info
 library(ggplot2)
 activity_by_date <- aggregate(steps~interval + datetype, df, mean, na.rm = TRUE)
-plot<- ggplot(activity_by_date, aes(x = interval , y = steps, color = datetype)) +
+g<- ggplot(activity_by_date, aes(x = interval , y = steps, color = datetype)) +
   geom_line() +
   labs(title = "Average daily steps by type of date", x = "Interval", y = "Average number of steps") +
   facet_wrap(~datetype, ncol = 1, nrow=2)
-print(plot)
+print(g)
 ```
 
 
