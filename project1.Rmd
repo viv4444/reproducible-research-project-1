@@ -54,8 +54,10 @@ moddf<-df%>%group_by(date)%>%summarise(steps=sum(steps))
 hist(moddf$steps,col = "red",xlab = "Total no of steps",ylab = "counts",main = "Total no of steps taken each day")
 
 ```
+
 ##Step 3
 ##Mean and median number of steps taken each day
+
 ```{r,echo=TRUE}
 # Read the data form the "csv" file "activity.csv" in your wd if you havent already
 
@@ -67,24 +69,25 @@ df<- tbl_df(csvfile)
 #To find the mean and median for each day and prepare a seperate table
 moddf<-df%>%group_by(date)%>%summarise(median(steps),mean(steps))
 summary(moddf)
+mean(df$steps)
+median(df$steps)
 
 ```
+
+
 ##Step 4
 ##Time series plot of the average number of steps taken
 ```{r,echo=TRUE}
+averageday <- df %>%
+  group_by(interval) %>%
+  summarize("average" = mean(steps, na.rm = TRUE))
 
-csvfile<-read.csv("activity.csv")
-
-#unload dplyr package
-library(dplyr)
-df<- tbl_df(csvfile)
-
-#using "moddf2" to plot avg no of steps taken each day
-moddf2<-df%>%group_by(date)%>%mutate(mean=mean(steps,na.rm = TRUE))
-
-plot(moddf2$interval,moddf2$mean,type = "l",lwd=2,xlab = "Interval",main = "line graph of mean steps per interval")
+plot(averageday$interval, averageday$average, type = "l", main = "Timeseries of average steps",
+     col = "cyan4", ylab = "Average Steps", xlab = "Interval")
 
 ```
+
+
 ##Step 5
 ##The 5-minute interval that, on average, contains the maximum number of steps
 
@@ -100,7 +103,11 @@ df<- tbl_df(csvfile)
 df$interval<-factor(df$interval)
 moddf4<-aggregate(data=df,steps~date+interval,FUN="mean")
 max<-aggregate(data=moddf4,steps~interval,FUN="max")
+max(max$steps)
 ```
+The average daily pattern shows very low steps between 0 and the 500th interval then a rise to around 50 steps per interval with a maximum of 206 steps at the 835th interval. After this peak, steps hover between 50 and 100 sets per interval until they decline around 1900.
+
+
 ##Step 6
 Code to describe and show a strategy for imputing missing data
 There are multiple strategies to deal with multiple value imputations.
@@ -132,6 +139,8 @@ replace_df<-df%>%group_by(date)%>%mutate(replaced_steps=ifelse(is.na(steps),yes 
 #replace_steps column is the imputed version of steps column in replace_df
 head(replace_df)
 sum(is.na(replace_df$replaced_steps))
+mean(replace_df$replaced_steps)
+median(replace_df$replaced_steps)
 ```
 
 ## Step 7
@@ -144,8 +153,10 @@ replace_sum<-tapply(replace_df$replaced_steps,replace_df$date,sum)
 hist(replace_sum,col = "blue",xlab = "Total Steps",main = "Total no of steps taken each day")
 
 ```
+
 ## Step 8
 Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends
+
 ```{r,echo=TRUE}
 #first we make a seperate column representing if the given day is weekend or weekday
 df$date <- as.Date(strptime(df$date, format="%Y-%m-%d"))
@@ -164,8 +175,6 @@ plot<- ggplot(activity_by_date, aes(x = interval , y = steps, color = datetype))
   labs(title = "Average daily steps by type of date", x = "Interval", y = "Average number of steps") +
   facet_wrap(~datetype, ncol = 1, nrow=2)
 print(plot)
-
-
 ```
 
 

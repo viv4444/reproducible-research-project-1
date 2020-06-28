@@ -146,8 +146,10 @@ hist(moddf$steps,col = "red",xlab = "Total no of steps",ylab = "counts",main = "
 ```
 
 ![](project1_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
 ##Step 3
 ##Mean and median number of steps taken each day
+
 
 ```r
 # Read the data form the "csv" file "activity.csv" in your wd if you havent already
@@ -172,23 +174,39 @@ summary(moddf)
 ##  2012-10-06: 1   Max.   :0     Max.   :73.5903  
 ##  (Other)   :55   NA's   :8     NA's   :8
 ```
+
+```r
+mean(df$steps)
+```
+
+```
+## [1] NA
+```
+
+```r
+median(df$steps)
+```
+
+```
+## [1] NA
+```
+
+
 ##Step 4
 ##Time series plot of the average number of steps taken
 
 ```r
-csvfile<-read.csv("activity.csv")
+averageday <- df %>%
+  group_by(interval) %>%
+  summarize("average" = mean(steps, na.rm = TRUE))
 
-#unload dplyr package
-library(dplyr)
-df<- tbl_df(csvfile)
-
-#using "moddf2" to plot avg no of steps taken each day
-moddf2<-df%>%group_by(date)%>%mutate(mean=mean(steps,na.rm = TRUE))
-
-plot(moddf2$interval,moddf2$mean,type = "l",lwd=2,xlab = "Interval",main = "line graph of mean steps per interval")
+plot(averageday$interval, averageday$average, type = "l", main = "Timeseries of average steps",
+     col = "cyan4", ylab = "Average Steps", xlab = "Interval")
 ```
 
 ![](project1_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
+
+
 ##Step 5
 ##The 5-minute interval that, on average, contains the maximum number of steps
 
@@ -205,7 +223,15 @@ df<- tbl_df(csvfile)
 df$interval<-factor(df$interval)
 moddf4<-aggregate(data=df,steps~date+interval,FUN="mean")
 max<-aggregate(data=moddf4,steps~interval,FUN="max")
+max(max$steps)
 ```
+
+```
+## [1] 806
+```
+The average daily pattern shows very low steps between 0 and the 500th interval then a rise to around 50 steps per interval with a maximum of 206 steps at the 835th interval. After this peak, steps hover between 50 and 100 sets per interval until they decline around 1900.
+
+
 ##Step 6
 Code to describe and show a strategy for imputing missing data
 There are multiple strategies to deal with multiple value imputations.
@@ -267,6 +293,22 @@ sum(is.na(replace_df$replaced_steps))
 ## [1] 0
 ```
 
+```r
+mean(replace_df$replaced_steps)
+```
+
+```
+## [1] 32.53734
+```
+
+```r
+median(replace_df$replaced_steps)
+```
+
+```
+## [1] 0
+```
+
 ## Step 7
 Histogram of the total number of steps taken each day after missing values are imputed
 
@@ -279,8 +321,10 @@ hist(replace_sum,col = "blue",xlab = "Total Steps",main = "Total no of steps tak
 ```
 
 ![](project1_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
+
 ## Step 8
 Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends
+
 
 ```r
 #first we make a seperate column representing if the given day is weekend or weekday
