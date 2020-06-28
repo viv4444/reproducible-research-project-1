@@ -2,7 +2,9 @@
 title: "project 1"
 author: "Vivek Singh"
 date: "6/28/2020"
-output: html_document
+output: 
+  html_document:
+    keep_md: true
 ---
 ##Assignment Instructions
 1.Code for reading in the dataset and/or processing the data
@@ -149,8 +151,9 @@ Panel plot comparing the average number of steps taken per 5-minute interval acr
 df$date <- as.Date(strptime(df$date, format="%Y-%m-%d"))
 df$datetype <- sapply(df$date, function(x) {
   if (weekdays(x) == "Sábado" | weekdays(x) =="Domingo") 
-  {y <- "Weekend"} else 
-  {y <- "Weekday"}
+     {y <- "Weekend"}
+  else 
+     {y <- "Weekday"}
   y
 })
 #now we plot panel graphs giving info about steps taken per interval based on weekday/weekend info

@@ -287,8 +287,9 @@ Panel plot comparing the average number of steps taken per 5-minute interval acr
 df$date <- as.Date(strptime(df$date, format="%Y-%m-%d"))
 df$datetype <- sapply(df$date, function(x) {
   if (weekdays(x) == "Sábado" | weekdays(x) =="Domingo") 
-  {y <- "Weekend"} else 
-  {y <- "Weekday"}
+     {y <- "Weekend"}
+  else 
+     {y <- "Weekday"}
   y
 })
 #now we plot panel graphs giving info about steps taken per interval based on weekday/weekend info
