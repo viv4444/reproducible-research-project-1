@@ -1,0 +1,204 @@
+---
+title: "project 1"
+author: "Vivek Singh"
+date: "6/28/2020"
+output: 
+  html_document:
+    keep_md: true
+---
+##Assignment Instructions
+.Code for reading in the dataset and/or processing the data
+
+.Histogram of the total number of steps taken each day
+
+.Mean and median number of steps taken each day
+
+.Time series plot of the average number of steps taken
+
+.The 5-minute interval that, on average, contains the maximum number of steps
+
+.Code to describe and show a strategy for imputing missing data
+
+.Histogram of the total number of steps taken each day after missing values are imputed
+
+.Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and
+weekends
+
+.All of the R code needed to reproduce the results (numbers, plots, etc.) in the report
+
+##Step 1
+##Code for reading in the dataset and/or processing the data
+```{r, echo = TRUE}
+setwd( "C:/Users/hp/Desktop/reproducible research project 1")
+csvfile<-read.csv("activity.csv")
+```
+
+Exploring the basics of this data
+
+```{r}
+dim(csvfile)
+names(csvfile)
+head(csvfile)
+str(csvfile)
+#total number of missing data
+sum(is.na(csvfile$steps))/dim(csvfile)[[1]]
+#transforming the date column into date format using lubridate
+library(lubridate)
+csvfile$date<-ymd(csvfile$date)
+length(unique(csvfile$date))
+```
+
+##Step 2
+
+##Histogram of the total number of steps taken each day
+
+```{r,echo=TRUE}
+#To plot the histogram of total number of steps taken per day
+
+# Read the data form the "csv" file "activity.csv" in your wd if you havent already
+
+csvfile<-read.csv("activity.csv")
+
+#unload dplyr package
+library(dplyr)
+df<- tbl_df(csvfile)
+#Find the sum of steps taken each day
+moddf<-df%>%group_by(date)%>%summarise(steps=sum(steps))
+#plot using base plot technique
+hist(moddf$steps,col = "red",xlab = "Total no of steps",ylab = "counts",main = "Total no of steps taken each day")
+
+```
+
+##Step 3
+
+##Mean and median number of steps taken each day
+
+```{r,echo=TRUE}
+# Read the data form the "csv" file "activity.csv" in your wd if you havent already
+
+csvfile<-read.csv("activity.csv")
+
+#unload dplyr package
+library(dplyr)
+df<- tbl_df(csvfile)
+#To find the mean and median for each day and prepare a seperate table
+moddf<-df%>%group_by(date)%>%summarise(median(steps),mean(steps))
+summary(moddf)
+mean(df$steps,na.rm=TRUE)
+median(df$steps,na.rm=TRUE)
+
+```
+hence the mean is 37.3826 and median is 0
+
+##Step 4
+
+##Time series plot of the average number of steps taken
+
+```{r,echo=TRUE}
+averageday <- df %>%
+  group_by(interval) %>%
+  summarize("average" = mean(steps, na.rm = TRUE))
+
+plot(averageday$interval, averageday$average, type = "l", main = "Timeseries of average steps",
+     col = "cyan4", ylab = "Average Steps", xlab = "Interval")
+
+```
+
+
+##Step 5
+
+##The 5-minute interval that, on average, contains the maximum number of steps
+
+```{r, echo = TRUE}
+#This is assuming that the words on average means averaging steps by date and interval
+
+csvfile<-read.csv("activity.csv")
+
+#unload dplyr package
+library(dplyr)
+df<- tbl_df(csvfile)
+#to calculate max
+df$interval<-factor(df$interval)
+moddf4<-aggregate(data=df,steps~date+interval,FUN="mean")
+max<-aggregate(data=moddf4,steps~interval,FUN="max")
+max(max$steps)
+```
+The average daily pattern shows very low steps between 0 and the 500th interval then a rise to around 50 steps per interval with a maximum of 206 steps at the 835th interval. After this peak, steps hover between 50 and 100 sets per interval until they decline around 1900.
+
+
+##Step 6
+
+Code to describe and show a strategy for imputing missing data
+There are multiple strategies to deal with multiple value imputations.
+The common strategies include:
+1. Constant value imputations
+2. Regression model value imputations
+3. Mean/mode value substitutions
+For the purpose of simplicity, in this question, I will use the mean/mode value substitution strategy to impute missing values. That is, using the mean values to substitute out the missing values in the original data set
+Before doing any sort of imputation, it is helpful to understand what are the distributions of missing values by date and interval
+
+```{r,echo=TRUE}
+#To find NA values in "steps" and impute mean values in place of NA values 
+
+# Read the data form the "csv" file "activity.csv" in your wd if you havent already
+
+csvfile<-read.csv("activity.csv")
+
+#unload dplyr package
+library(dplyr)
+df<- tbl_df(csvfile)
+
+#Find the total no of NA values in the data "steps"
+sum(is.na(df$steps))
+#create a set of values to be imputed in place of these NAs
+moddf2<-df%>%group_by(date)%>%mutate(mean=mean(steps))
+imputed<-moddf2$mean[is.na(moddf2$mean)!= TRUE]
+#"imputed" contains a set of values to be filled in place of NAs
+#create "replace_df" containing replaced values of "steps"
+replace_df<-df%>%group_by(date)%>%mutate(replaced_steps=ifelse(is.na(steps),yes = imputed,no=steps))
+#replace_steps column is the imputed version of steps column in replace_df
+head(replace_df)
+sum(is.na(replace_df$replaced_steps))
+mean(replace_df$replaced_steps)
+median(replace_df$replaced_steps)
+```
+
+## Step 7
+Histogram of the total number of steps taken each day after missing values are imputed
+
+```{r,echo=TRUE}
+#Make a histogram of the total number of steps taken each day 
+replace_sum<-tapply(replace_df$replaced_steps,replace_df$date,sum)
+
+
+hist(replace_sum,col = "blue",xlab = "Total Steps",main = "Total no of steps taken each day")
+
+```
+
+## Step 8
+Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends
+
+```{r,echo=TRUE}
+#first we make a seperate column representing if the given day is weekend or weekday
+df$date <- as.Date(strptime(df$date, format="%Y-%m-%d"))
+df$datetype <- sapply(df$date, function(x) {
+  if (weekdays(x) == "Saturday" | weekdays(x) =="Sunday") 
+    {y <- "Weekend"} 
+  else 
+    {y <- "Weekday"}
+  y
+})
+#now we plot panel graphs giving info about steps taken per interval based on weekday/weekend info
+library(ggplot2)
+activity_by_date <- aggregate(steps~interval + datetype, df, mean, na.rm = TRUE)
+g<-qplot(x=interval,y=steps,data = activity_by_date,facets = .~datetype,geom = "line",group=1)
+print(g)
+```
+
+
+
+
+
+
+
+
